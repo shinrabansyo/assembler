@@ -23,6 +23,9 @@ enum Inst {
     Sw { rs1: u8, rs2: u8, imm: i32 },
     Sh { rs1: u8, rs2: u8, imm: i32 },
     Sb { rs1: u8, rs2: u8, imm: i32 },
+
+    In { rd: u8, rs1: u8, imm: i32 },
+    Out { rs1: u8, rs2: u8, imm: i32 },
 }
 
 impl From<(&str, Vec<&str>)> for Inst {
@@ -56,6 +59,9 @@ impl From<(&str, Vec<&str>)> for Inst {
             "sh" => Inst::Sh { rs1: args[0] as u8, imm: args[1], rs2: args[2] as u8 },
             "sb" => Inst::Sb { rs1: args[0] as u8, imm: args[1], rs2: args[2] as u8 },
 
+            "in" => Inst::In { rd: args[0] as u8, rs1: args[1] as u8, imm: args[2] },
+            "out" => Inst::Out { rs1: args[0] as u8, imm: args[1], rs2: args[2] as u8 },
+
            _ => unimplemented!(),
         }
     }
@@ -85,6 +91,9 @@ impl From<&Inst> for u64 {
             Inst::Sw { rs1, rs2, imm } => format!("{:0>32b}_{:0>3b}_{:0>5b}_000_00101", imm, rs1, rs2),
             Inst::Sh { rs1, rs2, imm } => format!("{:0>32b}_{:0>3b}_{:0>5b}_001_00101", imm, rs1, rs2),
             Inst::Sb { rs1, rs2, imm } => format!("{:0>32b}_{:0>3b}_{:0>5b}_010_00101", imm, rs1, rs2),
+
+            Inst::In  { rd, rs1, imm } => format!("{:0>32b}_{:0>3b}_{:0>5b}_000_00110", imm, rs1, rd),
+            Inst::Out { rs1, rs2, imm } => format!("{:0>32b}_{:0>3b}_{:0>5b}_001_00110", imm, rs1, rs2),
         };
         let s: String = s.replace("_", "");
 
@@ -124,12 +133,12 @@ macro_rules! assembly {
         Inst::from((stringify!($kind), vec![stringify!($rd), stringify!($rs1), stringify!($rs2), stringify!($imm)]))
     };
 
-    // lw, ...
+    // lw, ..., in
     ($kind:ident $rd:ident = $rs1:ident[$imm:expr]) => {
         Inst::from((stringify!($kind), vec![stringify!($rd), stringify!($rs1), stringify!($imm)]))
     };
 
-    // sw, ...
+    // sw, ..., out
     ($kind:ident $rs1:ident[$imm:expr] = $rs2:ident) => {
         Inst::from((stringify!($kind), vec![stringify!($rs1), stringify!($imm), stringify!($rs2)]))
     };
@@ -138,10 +147,17 @@ macro_rules! assembly {
 #[rustfmt::skip]
 fn main() {
     vec![
-        assembly!(addi r1 = r0, 1),                // 00 (00)
-        assembly!(bne r0, (r0, r1) -> 0),          // 06 (06)
-        assembly!(addi r1 = r1, 1),                // 12 (0C)
+        // assembly!(addi r1 = r0, 1),                // 00 (00)
+        // assembly!(bne r0, (r0, r1) -> 0),          // 06 (06)
+        // assembly!(addi r1 = r1, 1),                // 12 (0C)
 
+        assembly!(addi r2 = r0, 97),                // 00 (00)
+        assembly!(out r0[0] = r2),                  // 06 (06)
+
+        // `out(x[rs1] + imm, rs2)`
+        // assembly!(out rs1[imm] = rs2),
+        // `rd = in(x[rs1] + imm)`
+        // assembly!(in rd = rs1[imm]),
 
         // assembly!(lw r6 = r0[0]),               // 00 (00)
         // assembly!(lw r7 = r0[4]),               // 06 (06)
