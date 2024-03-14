@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 assembler = { path = "./crates/assembler"}
+compiler = { path = "./crates/compiler" }
