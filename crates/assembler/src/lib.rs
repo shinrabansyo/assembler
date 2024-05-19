@@ -98,6 +98,79 @@ impl From<(&str, Vec<&str>)> for Inst {
     }
 }
 
+impl TryFrom<u64> for Inst {
+    type Error = ();
+    #[rustfmt::skip]
+    fn try_from(inst: u64) -> Result<Inst, Self::Error> {
+        let opcode     = ((inst >> 0) & 0x1F) as u8;
+        let opcode_sub = ((inst >> 5) & 0x07) as u8;
+        let rd         = ((inst >> (5+3)) & 0x1F) as u8;
+        let rs1_r      = ((inst >> (5+3+5)) & 0x1F) as u8;
+        let rs1_i_s    = rs1_r & 0x07;
+        let rs2        = rd;
+        let imm        = ((inst >> (5+3+5+3)) & 0xFFFFFFFF) as u32;
+        let _reserved  = ((inst >> (5+3+5+5+5)) & 0x1FFFFFF) as u32;
+
+        match opcode {
+            0x00 => {
+                match opcode_sub {
+                    0x00 => Ok(Inst::Add { rd: 0, rs1: 0, rs2: 0 }),
+                    _ => Err(()),
+                }
+            },
+            0x01 => {
+                match opcode_sub {
+                    0x01 => Ok(Inst::Add { rd, rs1: rs1_r, rs2 }),
+                    0x02 => Ok(Inst::Sub { rd, rs1: rs1_r, rs2 }),
+                    _ => Err(()),
+                }
+            },
+            0x02 => {
+                match opcode_sub {
+                    0x01 => Ok(Inst::Addi { rd, rs1: rs1_i_s, imm }),
+                    0x02 => Ok(Inst::Subi { rd, rs1: rs1_i_s, imm }),
+                    _ => Err(()),
+                }
+            },
+            0x03 => {
+                match opcode_sub {
+                    0x00 => Ok(Inst::Beq { rd, rs1: rs1_r, rs2, imm: imm as i32 }),
+                    0x01 => Ok(Inst::Bne { rd, rs1: rs1_r, rs2, imm: imm as i32 }),
+                    0x02 => Ok(Inst::Blt { rd, rs1: rs1_r, rs2, imm: imm as i32 }),
+                    0x03 => Ok(Inst::Ble { rd, rs1: rs1_r, rs2, imm: imm as i32 }),
+                    _ => Err(()),
+                }
+            },
+            0x04 => {
+                match opcode_sub {
+                    0x00 => Ok(Inst::Lw  { rd, rs1: rs1_i_s, imm: imm as i32 }),
+                    0x01 => Ok(Inst::Lh  { rd, rs1: rs1_i_s, imm: imm as i32 }),
+                    0x02 => Ok(Inst::Lb  { rd, rs1: rs1_i_s, imm: imm as i32 }),
+                    0x03 => Ok(Inst::Lhu { rd, rs1: rs1_i_s, imm: imm as i32 }),
+                    0x04 => Ok(Inst::Lbu { rd, rs1: rs1_i_s, imm: imm as i32 }),
+                    _ => Err(()),
+                }
+            },
+            0x05 => {
+                match opcode_sub {
+                    0x00 => Ok(Inst::Sw { rs1: rs1_i_s, rs2, imm: imm as i32 }),
+                    0x01 => Ok(Inst::Sh { rs1: rs1_i_s, rs2, imm: imm as i32 }),
+                    0x02 => Ok(Inst::Sb { rs1: rs1_i_s, rs2, imm: imm as i32 }),
+                    _ => Err(()),
+                }
+            },
+            0x06 => {
+                match opcode_sub {
+                    0x00 => Ok(Inst::In  { rd, rs1: rs1_i_s, imm: imm as i32 }),
+                    0x01 => Ok(Inst::Out { rs1: rs1_i_s, rs2, imm: imm as i32 }),
+                    _ => Err(()),
+                }
+            },
+            _ => Err(()),
+        }
+    }
+}
+
 impl From<&Inst> for u64 {
     #[rustfmt::skip]
     fn from(inst: &Inst) -> u64 {
