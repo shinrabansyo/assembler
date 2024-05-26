@@ -32,18 +32,59 @@ fn main() {
             beq r0, (r0, r0) -> -18
 
         */
+
+        /*
+        int main(void) {
+            *GPIO = 0;
+            *SPI_MODE = 0;
+            *SPI_CSHMAT = 0;
+
+            char c = 'a';
+            while (1) {
+                *GPIO = 1;
+                *SPI_DATA = c;
+                *GPIO = 0;
+
+                if (c == 'z') {
+                    c = 'a';
+                } else {
+                    ++ c;
+                }
+            }
+        }
+        */
+
+        // Gpio:Init
         assembly!(addi r1 = r0, 0),
+        assembly!(out r0[4] = r1),
+
+        // Spi:Mode
+        assembly!(addi r1 = r0, 3),
         assembly!(out r0[2] = r1),
 
+        // Spi:Clockshamt
         assembly!(addi r1 = r0, 4),
         assembly!(out r0[3] = r1),
 
+        // Loop:Setup
         assembly!(addi r2 = r0, 97),
         assembly!(addi r3 = r0, 123),
+
+        // Spi:CS
+        assembly!(addi r1 = r0, 1),
+        assembly!(out r0[4] = r1),
+
+        // Spi:Send
         assembly!(out r0[1] = r2),
+
+        // Spi:CS
+        assembly!(addi r1 = r0, 0),
+        assembly!(out r0[4] = r1),
+
+        // Loop
         assembly!(addi r2 = r2, 1),
-        assembly!(beq r0, (r2, r3) -> -24),
-        assembly!(beq r0, (r0, r0) -> -18),
+        assembly!(beq r0, (r2, r3) -> -48),
+        assembly!(beq r0, (r0, r0) -> -42),   
 
         // assembly!(addi r1 = r0, 1),                // 00 (00)
         // assembly!(bne r0, (r0, r1) -> 0),          // 06 (06)
