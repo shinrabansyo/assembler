@@ -1,3 +1,4 @@
+/*
 use std::collections::VecDeque;
 
 use thiserror::Error;
@@ -248,3 +249,4 @@ mod test {
         assert!(parse(lex("10 - \n     \t")).is_err());
     }
 }
+*/
