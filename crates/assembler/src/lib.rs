@@ -12,6 +12,6 @@ use convert::convert;
 pub fn assemble(program: &str) -> anyhow::Result<String> {
     let insts = parse(program)?;
     check(&insts)?;
-    // let insts = resolve(insts)?;
+    let insts = resolve(insts)?;
     convert(insts)
 }
