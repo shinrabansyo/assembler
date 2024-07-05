@@ -2,19 +2,33 @@ use crate::ir::{unresolved, resolved};
 use std::collections::HashMap;
 
 pub fn resolve(insts: Vec<unresolved::Inst>) -> anyhow::Result<Vec<resolved::Inst>> {
-    let mut label_map = HashMap::new();
+    let mut inst_label_map = HashMap::new();
     for (idx, inst) in insts.iter().enumerate() { 
         if inst.label.is_some() {
-            label_map.insert(inst.label.clone().unwrap(), idx*6);
+            inst_label_map.insert(inst.label.clone().unwrap(), idx*6);
         }
     }
 
-    let calc_diff = |label: &str, pos: i64| -> anyhow::Result<i32> {
-        let imm = (*label_map.get(label).unwrap() as i64) - pos * 6;
-        if imm >= ((1 << 24) as i64) || imm < (-(1 << 24) as i64) {
-            Err(anyhow::anyhow!("Overflow!"))
+    let calc_diff = |value: &unresolved::Value, pos: i64| -> i32 {
+        if let unresolved::Value::InstLabel(label) = value {
+            let imm = (*inst_label_map.get(label).unwrap() as i64) - pos * 6;
+            imm as i32
+        } else if let unresolved::Value::Imm(imm) = value {
+            *imm as i32
         } else {
-            Ok(imm as i32)
+            unreachable!();
+        }
+    };
+    
+    let calc_imm = |value: &unresolved::Value| -> u32 {
+        if let unresolved::Value::Imm(imm) = value {
+            *imm as u32
+        } else if let unresolved::Value::InstLabel(label) = value {
+            *inst_label_map.get(label).unwrap() as u32
+        } else if let unresolved::Value::DataLabel(_label) = value {
+            unimplemented!();
+        } else {
+            unreachable!();
         }
     };
 
@@ -23,8 +37,8 @@ pub fn resolve(insts: Vec<unresolved::Inst>) -> anyhow::Result<Vec<resolved::Ins
         let converted = match inst.kind {
             unresolved::InstKind::Add { rd, rs1, rs2 } => resolved::Inst::Add { rd, rs1, rs2 },
             unresolved::InstKind::Sub { rd, rs1, rs2 } => resolved::Inst::Sub { rd, rs1, rs2 },
-            unresolved::InstKind::Addi { rd, rs1, imm } => resolved::Inst::Addi { rd, rs1, imm },
-            unresolved::InstKind::Subi { rd, rs1, imm } => resolved::Inst::Subi { rd, rs1, imm },
+            unresolved::InstKind::Addi { rd, rs1, val } => resolved::Inst::Addi { rd, rs1, imm: calc_imm(&val) },
+            unresolved::InstKind::Subi { rd, rs1, val } => resolved::Inst::Subi { rd, rs1, imm: calc_imm(&val) },
             unresolved::InstKind::Lw { rd, rs1, imm } => resolved::Inst::Lw { rd, rs1, imm },
             unresolved::InstKind::Lh { rd, rs1, imm } => resolved::Inst::Lh { rd, rs1, imm },
             unresolved::InstKind::Lb { rd, rs1, imm } => resolved::Inst::Lb { rd, rs1, imm },
@@ -35,10 +49,10 @@ pub fn resolve(insts: Vec<unresolved::Inst>) -> anyhow::Result<Vec<resolved::Ins
             unresolved::InstKind::Sb { rs1, rs2, imm } => resolved::Inst::Sb { rs1, rs2, imm },
             unresolved::InstKind::In { rd, rs1, imm } => resolved::Inst::In { rd, rs1, imm },
             unresolved::InstKind::Out { rs1, rs2, imm } => resolved::Inst::Out { rs1, rs2, imm },
-            unresolved::InstKind::Beq { rd, rs1, rs2, label } => resolved::Inst::Beq { rd, rs1, rs2, imm: calc_diff(&label, idx as i64)? },
-            unresolved::InstKind::Ble { rd, rs1, rs2, label } => resolved::Inst::Ble { rd, rs1, rs2, imm: calc_diff(&label, idx as i64)? },
-            unresolved::InstKind::Blt { rd, rs1, rs2, label } => resolved::Inst::Blt { rd, rs1, rs2, imm: calc_diff(&label, idx as i64)? },
-            unresolved::InstKind::Bne { rd, rs1, rs2, label } => resolved::Inst::Bne { rd, rs1, rs2, imm: calc_diff(&label, idx as i64)? },
+            unresolved::InstKind::Beq { rd, rs1, rs2, val } => resolved::Inst::Beq { rd, rs1, rs2, imm: calc_diff(&val, idx as i64) },
+            unresolved::InstKind::Ble { rd, rs1, rs2, val } => resolved::Inst::Ble { rd, rs1, rs2, imm: calc_diff(&val, idx as i64) },
+            unresolved::InstKind::Blt { rd, rs1, rs2, val } => resolved::Inst::Blt { rd, rs1, rs2, imm: calc_diff(&val, idx as i64) },
+            unresolved::InstKind::Bne { rd, rs1, rs2, val } => resolved::Inst::Bne { rd, rs1, rs2, imm: calc_diff(&val, idx as i64) },
         };
         resolved_insts.push(converted);
     }

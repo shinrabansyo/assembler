@@ -1,30 +1,3 @@
-pub struct Inst {
-    pub kind: InstKind,
-    pub label: Option<String>,
-}
+mod inst;
 
-pub enum InstKind {
-    Add { rd: u8, rs1: u8, rs2: u8 },
-    Sub { rd: u8, rs1: u8, rs2: u8 },
-
-    Addi { rd: u8, rs1: u8, imm: u32 },
-    Subi { rd: u8, rs1: u8, imm: u32 },
-
-    Beq { rd: u8, rs1: u8, rs2: u8, label: String },
-    Bne { rd: u8, rs1: u8, rs2: u8, label: String },
-    Blt { rd: u8, rs1: u8, rs2: u8, label: String },
-    Ble { rd: u8, rs1: u8, rs2: u8, label: String },
-
-    Lw { rd: u8, rs1: u8, imm: i32 },
-    Lh { rd: u8, rs1: u8, imm: i32 },
-    Lb { rd: u8, rs1: u8, imm: i32 },
-    Lhu { rd: u8, rs1: u8, imm: i32 },
-    Lbu { rd: u8, rs1: u8, imm: i32 },
-
-    Sw { rs1: u8, rs2: u8, imm: i32 },
-    Sh { rs1: u8, rs2: u8, imm: i32 },
-    Sb { rs1: u8, rs2: u8, imm: i32 },
-
-    In { rd: u8, rs1: u8, imm: i32 },
-    Out { rs1: u8, rs2: u8, imm: i32 },
-}
+pub use inst::*;

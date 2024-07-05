@@ -1,5 +1,6 @@
 use crate::ir::unresolved::Inst;
 use crate::ir::unresolved::InstKind;
+use crate::ir::unresolved::Value;
 
 pub fn parse(program: &str) -> anyhow::Result<Vec<Inst>> {
     // program
@@ -104,7 +105,7 @@ fn parse_line(line: &str) -> anyhow::Result<Inst> {
 
 fn parse_inst(kind: &str, args: Vec<&str>) -> anyhow::Result<Inst> {
     enum ArgEither {
-        Num(i32),
+        Num(i64),
         String(String),
     }
 
@@ -118,22 +119,23 @@ fn parse_inst(kind: &str, args: Vec<&str>) -> anyhow::Result<Inst> {
         
         fn i32(&self) -> i32 {
             match self {
-                ArgEither::Num(num) => *num,
+                ArgEither::Num(num) => *num as i32,
                 ArgEither::String(s) => panic!("Unexpected string: {}", s),
             }
         }
         
-        fn u32(&self) -> u32 {
+        fn value(&self) -> Value {
             match self {
-                ArgEither::Num(num) => *num as u32,
-                ArgEither::String(s) => panic!("Unexpected string: {}", s),
-            }
-        }
-
-        fn string(&self) -> String {
-            match self {
-                ArgEither::Num(num) => panic!("Unexpected number: {}", num),
-                ArgEither::String(s) => s.clone(),
+                ArgEither::Num(num) => Value::Imm(*num as i64),
+                ArgEither::String(s) => {
+                    let mut chars = s.chars();
+                    let first_c = chars.next().unwrap();
+                    match first_c {
+                        '$' => Value::DataLabel(chars.collect::<String>()),
+                        '@' => Value::InstLabel(chars.collect::<String>()),
+                        _ => panic!("Unexpected label: {}", s),
+                    }
+                }
             }
         }
     }
@@ -142,7 +144,7 @@ fn parse_inst(kind: &str, args: Vec<&str>) -> anyhow::Result<Inst> {
         .into_iter()
         .map(|arg| arg.replace("r", ""))
         .map(|arg| {
-            match arg.parse::<i32>() {
+            match arg.parse::<i64>() {
                 Ok(num) => ArgEither::Num(num),
                 Err(_) => ArgEither::String(arg),
             }
@@ -153,13 +155,13 @@ fn parse_inst(kind: &str, args: Vec<&str>) -> anyhow::Result<Inst> {
         "add" => Ok(InstKind::Add { rd: args[0].u8(), rs1: args[1].u8(), rs2: args[2].u8() }),
         "sub" => Ok(InstKind::Sub { rd: args[0].u8(), rs1: args[1].u8(), rs2: args[2].u8() }),
 
-        "addi" => Ok(InstKind::Addi { rd: args[0].u8(), rs1: args[1].u8(), imm: args[2].u32() }),
-        "subi" => Ok(InstKind::Subi { rd: args[0].u8(), rs1: args[1].u8(), imm: args[2].u32() }),
+        "addi" => Ok(InstKind::Addi { rd: args[0].u8(), rs1: args[1].u8(), val: args[2].value() }),
+        "subi" => Ok(InstKind::Subi { rd: args[0].u8(), rs1: args[1].u8(), val: args[2].value() }),
 
-        "beq" => Ok(InstKind::Beq { rd: args[0].u8(), rs1: args[1].u8(), rs2: args[2].u8(), label: args[3].string() }),
-        "bne" => Ok(InstKind::Bne { rd: args[0].u8(), rs1: args[1].u8(), rs2: args[2].u8(), label: args[3].string() }),
-        "blt" => Ok(InstKind::Blt { rd: args[0].u8(), rs1: args[1].u8(), rs2: args[2].u8(), label: args[3].string() }),
-        "ble" => Ok(InstKind::Ble { rd: args[0].u8(), rs1: args[1].u8(), rs2: args[2].u8(), label: args[3].string() }),
+        "beq" => Ok(InstKind::Beq { rd: args[0].u8(), rs1: args[1].u8(), rs2: args[2].u8(), val: args[3].value() }),
+        "bne" => Ok(InstKind::Bne { rd: args[0].u8(), rs1: args[1].u8(), rs2: args[2].u8(), val: args[3].value() }),
+        "blt" => Ok(InstKind::Blt { rd: args[0].u8(), rs1: args[1].u8(), rs2: args[2].u8(), val: args[3].value() }),
+        "ble" => Ok(InstKind::Ble { rd: args[0].u8(), rs1: args[1].u8(), rs2: args[2].u8(), val: args[3].value() }),
 
         "lw" => Ok(InstKind::Lw { rd: args[0].u8(), rs1: args[1].u8(), imm: args[2].i32() }),
         "lh" => Ok(InstKind::Lh { rd: args[0].u8(), rs1: args[1].u8(), imm: args[2].i32() }),
