@@ -1,6 +1,6 @@
-use crate::ir::unresolved::Inst;
-use crate::ir::unresolved::InstKind;
-use crate::ir::unresolved::Value;
+use crate::imem::ir::unresolved::Inst;
+use crate::imem::ir::unresolved::InstKind;
+use crate::imem::ir::unresolved::Value;
 
 pub fn parse(program: &str) -> anyhow::Result<Vec<Inst>> {
     // program

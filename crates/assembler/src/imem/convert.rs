@@ -1,6 +1,6 @@
 use std::fmt::Write;
 
-use crate::ir::resolved::Inst;
+use crate::imem::ir::resolved::Inst;
 
 pub fn convert(insts: Vec<Inst>) -> anyhow::Result<String> {
     let mut result = String::new();

@@ -1,4 +1,4 @@
-use crate::ir::unresolved::{Inst, InstKind, Value};
+use crate::imem::ir::unresolved::{Inst, InstKind, Value};
 
 pub fn check(insts: &[Inst]) -> anyhow::Result<()> {
     check_instlabel(insts)?;

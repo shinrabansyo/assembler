@@ -1,4 +1,4 @@
-use crate::ir::{unresolved, resolved};
+use crate::imem::ir::{unresolved, resolved};
 use std::collections::HashMap;
 
 pub fn resolve(insts: Vec<unresolved::Inst>) -> anyhow::Result<Vec<resolved::Inst>> {

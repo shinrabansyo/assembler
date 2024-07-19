@@ -40,4 +40,3 @@ pub enum Value {
     InstLabel(String),
     Imm(i64),
 }
-

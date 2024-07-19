@@ -23,5 +23,3 @@ pub enum Inst {
     In { rd: u8, rs1: u8, imm: i32 },
     Out { rs1: u8, rs2: u8, imm: i32 },
 }
-
-
