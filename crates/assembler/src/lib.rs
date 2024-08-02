@@ -18,6 +18,8 @@ pub fn assemble(program: &str) -> anyhow::Result<String> {
     let imem_section = &lines[sep_pos+1..].join("\n");
 
     // dmem のパース
+    let data = dmem::parse(&dmem_section)?;
+    println!("{:?}", data);
 
     // imem のパース
     let insts = imem::parse(&imem_section)?;
