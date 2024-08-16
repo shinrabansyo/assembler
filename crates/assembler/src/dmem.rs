@@ -1,4 +1,4 @@
-mod ir;
+pub mod ir;
 mod parse;
 
 pub use parse::parse;

@@ -9,7 +9,7 @@ use check::check;
 use resolve::resolve;
 use convert::convert;
 
-pub fn assemble(program: &str) -> anyhow::Result<String> { 
+pub fn assemble(program: &str) -> anyhow::Result<(String, String)> { 
     let lines = program.lines();
     let sep_pos = lines.clone().position(|line| line == "===").unwrap();
 
@@ -18,14 +18,13 @@ pub fn assemble(program: &str) -> anyhow::Result<String> {
     let imem_section = &lines[sep_pos+1..].join("\n");
 
     // dmem のパース
-    let data = dmem::parse(&dmem_section)?;
-    println!("{:?}", data);
+    let datas = dmem::parse(&dmem_section)?;
 
     // imem のパース
     let insts = imem::parse(&imem_section)?;
     
     // 合流
-    check(&insts)?;
-    let insts = resolve(insts)?;
-    convert(insts)
+    check(&datas, &insts)?;
+    let insts = resolve(&datas, insts)?;
+    convert(datas, insts)
 }

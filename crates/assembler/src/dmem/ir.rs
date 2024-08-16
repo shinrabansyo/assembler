@@ -22,7 +22,7 @@ impl Command {
             Command::Byte4(_) => 4,
             Command::Byte6(_) => 6,
             Command::Char(_) => 1,
-            Command::String(s) => s.len() + 1,
+            Command::String(s) => s.as_bytes().len() + 1,
         }
     }
 }

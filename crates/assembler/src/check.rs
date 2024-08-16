@@ -1,14 +1,20 @@
 use crate::imem::ir::unresolved::{Inst, InstKind, Value};
+use crate::dmem::ir::Data;
 
-pub fn check(insts: &[Inst]) -> anyhow::Result<()> {
-    check_instlabel(insts)?;
+pub fn check(datas: &[Data], insts: &[Inst]) -> anyhow::Result<()> {
+    check_label_exists(datas, insts)?; 
     check_label_usage(insts)?;
     check_value_range(insts)?;
     Ok(()) 
 }
 
 // 宣言されていないラベルを呼び出ししていたらエラー
-fn check_instlabel(insts: &[Inst]) -> anyhow::Result<()> {
+fn check_label_exists(datas: &[Data], insts: &[Inst]) -> anyhow::Result<()> {
+    let data_labels = datas.iter()
+        .filter(|data| data.label.is_some())
+        .map(|data| data.label.clone().unwrap())
+        .collect::<Vec<String>>();  
+    
     let inst_labels = insts.iter()
         .filter(|inst| inst.label.is_some())
         .map(|inst| inst.label.clone().unwrap())
@@ -26,11 +32,20 @@ fn check_instlabel(insts: &[Inst]) -> anyhow::Result<()> {
             _ => continue,
         };
         
-        if let Value::InstLabel(label) = val {
-            if !inst_labels.contains(label) {
-                return Err(anyhow::anyhow!("label {} is not found", label));
+        match val {
+            Value::DataLabel(label) => {
+                if !data_labels.contains(label) {
+                    return Err(anyhow::anyhow!("label {} is not found", label));
+                }
             }
+            Value::InstLabel(label) => {
+                if !inst_labels.contains(label) {
+                    return Err(anyhow::anyhow!("label {} is not found", label));
+                }
+            }
+            _ => {},
         }
+
     }
     Ok(())
 }

@@ -1,8 +1,51 @@
 use std::fmt::Write;
 
 use crate::imem::ir::resolved::Inst;
+use crate::dmem::ir::{Data, Command};
 
-pub fn convert(insts: Vec<Inst>) -> anyhow::Result<String> {
+pub fn convert(datas: Vec<Data>, insts: Vec<Inst>) -> anyhow::Result<(String, String)> {
+    let datas = command_convert(datas)?;
+    let inst = inst_convert(insts)?;
+    Ok((datas, inst))
+}
+pub fn command_convert(datas: Vec<Data>) -> anyhow::Result<String> {
+    let mut result = String::new();
+
+    for data in datas {
+        match data.command {
+            Command::Byte1(s) => writeln!(result, "{:0>2X}", s)?,
+            Command::Byte2(s) => {
+                writeln!(result, "{:0>2X}", (s >>  0) & 0xff)?;
+                writeln!(result, "{:0>2X}", (s >>  8) & 0xff)?;
+            }
+            Command::Byte4(s) => {
+                writeln!(result, "{:0>2X}", (s >>  0) & 0xff)?;
+                writeln!(result, "{:0>2X}", (s >>  8) & 0xff)?;
+                writeln!(result, "{:0>2X}", (s >> 16) & 0xff)?;
+                writeln!(result, "{:0>2X}", (s >> 24) & 0xff)?;
+            }
+            Command::Byte6(s) => {
+                writeln!(result, "{:0>2X}", (s >>  0) & 0xff)?;
+                writeln!(result, "{:0>2X}", (s >>  8) & 0xff)?;
+                writeln!(result, "{:0>2X}", (s >> 16) & 0xff)?;
+                writeln!(result, "{:0>2X}", (s >> 24) & 0xff)?;
+                writeln!(result, "{:0>2X}", (s >> 32) & 0xff)?;
+                writeln!(result, "{:0>2X}", (s >> 40) & 0xff)?;
+            },
+            Command::Char(s) => writeln!(result, "{:0>2X}", s as u8)?,
+            Command::String(s) => {
+                for n in s.as_bytes(){
+                    writeln!(result, "{:0>2X}", n)?;
+                }
+                writeln!(result, "{:0>2X}", 0)?;
+            },
+        }
+    }
+
+    Ok(result)
+}
+
+pub fn inst_convert(insts: Vec<Inst>) -> anyhow::Result<String> {
     let mut result = String::new();
 
     for inst in insts {

@@ -1,7 +1,17 @@
 use crate::imem::ir::{unresolved, resolved};
+use crate::dmem::ir::Data;
 use std::collections::HashMap;
 
-pub fn resolve(insts: Vec<unresolved::Inst>) -> anyhow::Result<Vec<resolved::Inst>> {
+pub fn resolve(datas: &[Data], insts: Vec<unresolved::Inst>) -> anyhow::Result<Vec<resolved::Inst>> {
+    let mut data_label_map = HashMap::new();
+    let mut current_addr = 0;
+    for data in datas {
+        if data.label.is_some() {
+            data_label_map.insert(data.label.clone().unwrap(), current_addr);
+        }
+        current_addr += data.command.len();
+    }
+
     let mut inst_label_map = HashMap::new();
     for (idx, inst) in insts.iter().enumerate() { 
         if inst.label.is_some() {
@@ -25,8 +35,8 @@ pub fn resolve(insts: Vec<unresolved::Inst>) -> anyhow::Result<Vec<resolved::Ins
             *imm as u32
         } else if let unresolved::Value::InstLabel(label) = value {
             *inst_label_map.get(label).unwrap() as u32
-        } else if let unresolved::Value::DataLabel(_label) = value {
-            unimplemented!();
+        } else if let unresolved::Value::DataLabel(label) = value {
+            *data_label_map.get(label).unwrap() as u32
         } else {
             unreachable!();
         }
