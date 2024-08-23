@@ -63,6 +63,7 @@ pub fn resolve(datas: &[Data], insts: Vec<unresolved::Inst>) -> anyhow::Result<V
             unresolved::InstKind::Ble { rd, rs1, rs2, val } => resolved::Inst::Ble { rd, rs1, rs2, imm: calc_diff(&val, idx as i64) },
             unresolved::InstKind::Blt { rd, rs1, rs2, val } => resolved::Inst::Blt { rd, rs1, rs2, imm: calc_diff(&val, idx as i64) },
             unresolved::InstKind::Bne { rd, rs1, rs2, val } => resolved::Inst::Bne { rd, rs1, rs2, imm: calc_diff(&val, idx as i64) },
+            unresolved::InstKind::Jal { rd, rs1, imm } => resolved::Inst::Jal { rd, rs1, imm },
         };
         resolved_insts.push(converted);
     }

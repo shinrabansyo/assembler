@@ -18,8 +18,8 @@ fn main() {
     let (datas, insts) = assemble(&source).unwrap();
 
     let file_data_path = &args[2];
-    File::create_new(file_data_path).unwrap().write_all(datas.as_bytes()).unwrap();
+    File::create(file_data_path).unwrap().write(datas.as_bytes()).unwrap();
 
     let file_inst_path = &args[3];
-    File::create_new(file_inst_path).unwrap().write_all(insts.as_bytes()).unwrap();
+    File::create(file_inst_path).unwrap().write(insts.as_bytes()).unwrap();
 }

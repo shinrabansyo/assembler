@@ -9,6 +9,7 @@ pub enum Inst {
     Bne { rd: u8, rs1: u8, rs2: u8, imm: i32 },
     Blt { rd: u8, rs1: u8, rs2: u8, imm: i32 },
     Ble { rd: u8, rs1: u8, rs2: u8, imm: i32 },
+    Jal { rd: u8, rs1: u8, imm: i32 },
 
     Lw { rd: u8, rs1: u8, imm: i32 },
     Lh { rd: u8, rs1: u8, imm: i32 },

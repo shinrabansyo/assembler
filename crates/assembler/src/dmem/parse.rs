@@ -50,21 +50,11 @@ fn parse_line(line: &str) -> anyhow::Result<Vec<Data>> {
         });
     }
 
-    // line: "byte2 1, 2, 3, 4"
-    // command : "byte2"
-    // args : "1, 2, 3, 4"
-    // args.split : ["1", "2", "3", "4"]
-    // ...
-    // Command::Byte2(1)
-    // Command::Byte2(2)
-    // ...
-    
-
     Ok(data)
 }
 
 fn parse_u8(num: &str) -> anyhow::Result<u8> {
-    let mut num = num.parse::<i64>().unwrap();
+    let mut num = parse_num_with_radix(num)?;
     if !(i8::MIN as i64 <= num && num <= u8::MAX as i64) {
         return Err(anyhow::anyhow!("Invalid value: {}", num));
     } 
@@ -75,7 +65,7 @@ fn parse_u8(num: &str) -> anyhow::Result<u8> {
 }
 
 fn parse_u16(num: &str) -> anyhow::Result<u16> {
-    let mut num = num.parse::<i64>().unwrap();
+    let mut num = parse_num_with_radix(num)?;
     if !(i16::MIN as i64 <= num && num <= u16::MAX as i64) {
         return Err(anyhow::anyhow!("Invalid value: {}", num));
     } 
@@ -86,7 +76,7 @@ fn parse_u16(num: &str) -> anyhow::Result<u16> {
 }
 
 fn parse_u32(num: &str) -> anyhow::Result<u32> {
-    let mut num = num.parse::<i64>().unwrap();
+    let mut num = parse_num_with_radix(num)?;
     if !(i32::MIN as i64 <= num && num <= u32::MAX as i64) {
         return Err(anyhow::anyhow!("Invalid value: {}", num));
     } 
@@ -97,7 +87,7 @@ fn parse_u32(num: &str) -> anyhow::Result<u32> {
 }
 
 fn parse_u48(num: &str) -> anyhow::Result<u64> {
-    let mut num = num.parse::<i64>().unwrap();
+    let mut num = parse_num_with_radix(num)?;
     let i48_min = -(1 << 47);
     let u48_max = (1 << 48) - 1;
     if !(i48_min <= num && num <= u48_max) {
@@ -107,6 +97,23 @@ fn parse_u48(num: &str) -> anyhow::Result<u64> {
         num = (num + u48_max + 1) | 0x800000000000;
     }
     Ok(num as u64)
+}
+
+fn parse_num_with_radix(num_s: &str) -> anyhow::Result<i64> {
+    // 0x 0X: 16, 0b 0B: 2, nothing: 10
+    let num = if (num_s.starts_with("0x") || num_s.starts_with("0X")) && num_s.len() > 2 {
+        i64::from_str_radix(&num_s[2..], 16)
+    } else if (num_s.starts_with("0b") || num_s.starts_with("0B")) && num_s.len() > 2 {
+        i64::from_str_radix(&num_s[2..], 2)
+    } else {
+        i64::from_str_radix(&num_s, 10)
+    };
+
+    if let Ok(num) = num {
+        Ok(num)
+    } else {
+        Err(anyhow::anyhow!("Invalid value: {}", num_s))
+    }
 }
 
 fn parse_char(ch: &str) -> anyhow::Result<char> {

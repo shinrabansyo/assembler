@@ -38,9 +38,13 @@ fn parse_line(line: &str) -> anyhow::Result<Inst> {
         // beq, ...
         let splitted_by_arrow = line.split("->").collect::<Vec<_>>();
         (splitted_by_arrow[0], splitted_by_arrow[1])
-    } else {
+    } else if line.contains("=") {
         // add, lw, sw, in, out, ...
         let splitted_by_eq = line.split("=").collect::<Vec<_>>();
+        (splitted_by_eq[0], splitted_by_eq[1])
+    } else {
+        // jal
+        let splitted_by_eq = line.split(",").collect::<Vec<_>>();
         (splitted_by_eq[0], splitted_by_eq[1])
     };
     let lhs = lhs.split_ascii_whitespace().collect::<Vec<_>>();
@@ -86,12 +90,19 @@ fn parse_line(line: &str) -> anyhow::Result<Inst> {
         return parse_inst(kind, vec![lhs, rhs[0], &rhs[1].replace("]", "")]);
     }
 
-    // アセンブリ言語例
-    // assembly!(out r0[4] = r1),
-    // assembly!(addi r1 = r0, 1),                // 00 (00)
-    // assembly!(beq r0, (r0, r0) -> -42),
-    // assembly!(lw r7 = r0[4]),               // 06 (06)
-    // assembly!(sw r0[0] = r7),               // 12 (0C)
+    // jal
+    if lhs.starts_with("jal") {
+        // jal r0, r1[0]
+        // lhs: jal r0
+        // rhs: r1[0]
+        // save_reg: r0
+        let save_reg = lhs.trim().split_ascii_whitespace().next().unwrap().trim();
+        let rhs = rhs
+            .split("[")
+            .map(|e| e.trim())
+            .collect::<Vec<_>>();
+        return parse_inst("jal", vec![save_reg, rhs[0], &rhs[1].replace("]", "")]);
+    }
 
     // add, addi, ...
     let lhs = lhs.trim();
@@ -142,11 +153,18 @@ fn parse_inst(kind: &str, args: Vec<&str>) -> anyhow::Result<Inst> {
 
     let args = args
         .into_iter()
-        .map(|arg| arg.replace("r", ""))
         .map(|arg| {
-            match arg.parse::<i64>() {
+            let num = if (arg.starts_with("0x") || arg.starts_with("0X")) && arg.len() > 2 {
+                i64::from_str_radix(&arg[2..], 16)
+            } else if (arg.starts_with("0b") || arg.starts_with("0B")) && arg.len() > 2 {
+                i64::from_str_radix(&arg[2..], 2)
+            } else {
+                // レジスタの指定を数値として扱いたい(r0, r1, ..., r31)
+                i64::from_str_radix(&arg.replace("r", ""), 10)
+            };
+            match num {
                 Ok(num) => ArgEither::Num(num),
-                Err(_) => ArgEither::String(arg),
+                Err(_) => ArgEither::String(arg.to_string()),
             }
         })
         .collect::<Vec<_>>();
@@ -162,6 +180,7 @@ fn parse_inst(kind: &str, args: Vec<&str>) -> anyhow::Result<Inst> {
         "bne" => Ok(InstKind::Bne { rd: args[0].u8(), rs1: args[1].u8(), rs2: args[2].u8(), val: args[3].value() }),
         "blt" => Ok(InstKind::Blt { rd: args[0].u8(), rs1: args[1].u8(), rs2: args[2].u8(), val: args[3].value() }),
         "ble" => Ok(InstKind::Ble { rd: args[0].u8(), rs1: args[1].u8(), rs2: args[2].u8(), val: args[3].value() }),
+        "jal" => Ok(InstKind::Jal { rd: args[0].u8(), rs1: args[1].u8(), imm: args[2].i32() }),
 
         "lw" => Ok(InstKind::Lw { rd: args[0].u8(), rs1: args[1].u8(), imm: args[2].i32() }),
         "lh" => Ok(InstKind::Lh { rd: args[0].u8(), rs1: args[1].u8(), imm: args[2].i32() }),
