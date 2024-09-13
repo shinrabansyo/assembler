@@ -4,8 +4,10 @@ use crate::dmem::ir::Data;
 pub fn check(datas: &[Data], insts: &[Inst]) -> anyhow::Result<()> {
     check_label_exists(datas, insts)?; 
     check_label_usage(insts)?;
+    check_reg_range(insts)?;
     check_value_range(insts)?;
-    Ok(()) 
+
+    Ok(())
 }
 
 // 宣言されていないラベルを呼び出ししていたらエラー
@@ -61,6 +63,56 @@ fn check_label_usage(insts: &[Inst]) -> anyhow::Result<()> {
         };
         if !is_collect_usage {
             return Err(anyhow::anyhow!("Datalabel is not permitted in branch instruction {:?}", inst));
+        }
+    }
+    Ok(())
+}
+
+fn check_reg_range(insts: &[Inst]) -> anyhow::Result<()> {
+    // I形式：rd: 0-31, rs1: 0-7
+    // R/B/S形式: rd/rs1/rs2: 0-31
+    
+    let check_i_type = |rd: &u8, rs1: &u8| -> bool {
+        *rd <= 31 && *rs1 <= 7
+    };
+    let check_s_type = |rs1: &u8, rs2: &u8| -> bool {
+        *rs1 <= 7 && *rs2 <= 31
+    };
+    let check_other_type = |rd: &u8, rs1: &u8, rs2: &u8| -> bool {
+        *rd <= 31 && *rs1 <= 31 && *rs2 <= 31
+    };
+
+    for inst in insts {
+        let is_correct_reg = match &inst.kind {
+            // I-type
+            InstKind::Addi { rd, rs1, .. } => check_i_type(rd, rs1),
+            InstKind::Subi { rd, rs1, .. } => check_i_type(rd, rs1),
+            InstKind::Jal  { rd, rs1, .. } => check_i_type(rd, rs1),
+            InstKind::Lw   { rd, rs1, .. } => check_i_type(rd, rs1),
+            InstKind::Lh   { rd, rs1, .. } => check_i_type(rd, rs1),
+            InstKind::Lb   { rd, rs1, .. } => check_i_type(rd, rs1),
+            InstKind::Lhu  { rd, rs1, .. } => check_i_type(rd, rs1),
+            InstKind::Lbu  { rd, rs1, .. } => check_i_type(rd, rs1),
+            InstKind::In   { rd, rs1, .. } => check_i_type(rd, rs1),
+            
+            // S-type
+            InstKind::Sw  { rs1, rs2, .. } => check_s_type(rs1, rs2),
+            InstKind::Sh  { rs1, rs2, .. } => check_s_type(rs1, rs2),
+            InstKind::Sb  { rs1, rs2, .. } => check_s_type(rs1, rs2),
+            InstKind::Out { rs1, rs2, .. } => check_s_type(rs1, rs2),
+            
+            // R-type
+            InstKind::Add { rd, rs1, rs2 } => check_other_type(rd, rs1, rs2),
+            InstKind::Sub { rd, rs1, rs2 } => check_other_type(rd, rs1, rs2),
+            
+            // B-type
+            InstKind::Beq { rd, rs1, rs2, .. } => check_other_type(rd, rs1, rs2),
+            InstKind::Bne { rd, rs1, rs2, .. } => check_other_type(rd, rs1, rs2),
+            InstKind::Blt { rd, rs1, rs2, .. } => check_other_type(rd, rs1, rs2),
+            InstKind::Ble { rd, rs1, rs2, .. } => check_other_type(rd, rs1, rs2), 
+        };
+        if !is_correct_reg {
+            return Err(anyhow::anyhow!("Invalid register usage: {:?}", inst));
         }
     }
     Ok(())
