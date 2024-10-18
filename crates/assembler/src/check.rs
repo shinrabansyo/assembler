@@ -94,6 +94,12 @@ fn check_reg_range(insts: &[Inst]) -> anyhow::Result<()> {
             InstKind::Lhu  { rd, rs1, .. } => check_i_type(rd, rs1),
             InstKind::Lbu  { rd, rs1, .. } => check_i_type(rd, rs1),
             InstKind::In   { rd, rs1, .. } => check_i_type(rd, rs1),
+            InstKind::Andi { rd, rs1, .. } => check_i_type(rd, rs1),
+            InstKind::Ori { rd, rs1, .. } => check_i_type(rd, rs1),
+            InstKind::Xori { rd, rs1, .. } => check_i_type(rd, rs1),
+            InstKind::Srli { rd, rs1, .. } => check_i_type(rd, rs1),
+            InstKind::Srai { rd, rs1, .. } => check_i_type(rd, rs1),
+            InstKind::Slli { rd, rs1, .. } => check_i_type(rd, rs1),
             
             // S-type
             InstKind::Sw  { rs1, rs2, .. } => check_s_type(rs1, rs2),
@@ -104,7 +110,13 @@ fn check_reg_range(insts: &[Inst]) -> anyhow::Result<()> {
             // R-type
             InstKind::Add { rd, rs1, rs2 } => check_other_type(rd, rs1, rs2),
             InstKind::Sub { rd, rs1, rs2 } => check_other_type(rd, rs1, rs2),
-            
+            InstKind::And { rd, rs1, rs2 } => check_other_type(rd, rs1, rs2),
+            InstKind::Or { rd, rs1, rs2 } => check_other_type(rd, rs1, rs2),
+            InstKind::Xor { rd, rs1, rs2 } => check_other_type(rd, rs1, rs2),
+            InstKind::Srl { rd, rs1, rs2 } => check_other_type(rd, rs1, rs2),
+            InstKind::Sra { rd, rs1, rs2 } => check_other_type(rd, rs1, rs2),
+            InstKind::Sll { rd, rs1, rs2 } => check_other_type(rd, rs1, rs2),
+
             // B-type
             InstKind::Beq { rd, rs1, rs2, .. } => check_other_type(rd, rs1, rs2),
             InstKind::Bne { rd, rs1, rs2, .. } => check_other_type(rd, rs1, rs2),

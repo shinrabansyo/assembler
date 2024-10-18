@@ -47,26 +47,46 @@ pub fn resolve(datas: &[Data], insts: Vec<unresolved::Inst>) -> anyhow::Result<V
         let converted = match inst.kind {
             unresolved::InstKind::Add { rd, rs1, rs2 } => resolved::Inst::Add { rd, rs1, rs2 },
             unresolved::InstKind::Sub { rd, rs1, rs2 } => resolved::Inst::Sub { rd, rs1, rs2 },
+
             unresolved::InstKind::Addi { rd, rs1, val } => resolved::Inst::Addi { rd, rs1, imm: calc_imm(&val) },
             unresolved::InstKind::Subi { rd, rs1, val } => resolved::Inst::Subi { rd, rs1, imm: calc_imm(&val) },
-            unresolved::InstKind::Lw { rd, rs1, imm } => resolved::Inst::Lw { rd, rs1, imm },
-            unresolved::InstKind::Lh { rd, rs1, imm } => resolved::Inst::Lh { rd, rs1, imm },
-            unresolved::InstKind::Lb { rd, rs1, imm } => resolved::Inst::Lb { rd, rs1, imm },
-            unresolved::InstKind::Lhu { rd, rs1, imm } => resolved::Inst::Lhu { rd, rs1, imm },
-            unresolved::InstKind::Lbu { rd, rs1, imm } => resolved::Inst::Lbu { rd, rs1, imm },
-            unresolved::InstKind::Sw { rs1, rs2, imm } => resolved::Inst::Sw { rs1, rs2, imm },
-            unresolved::InstKind::Sh { rs1, rs2, imm } => resolved::Inst::Sh { rs1, rs2, imm },
-            unresolved::InstKind::Sb { rs1, rs2, imm } => resolved::Inst::Sb { rs1, rs2, imm },
-            unresolved::InstKind::In { rd, rs1, imm } => resolved::Inst::In { rd, rs1, imm },
-            unresolved::InstKind::Out { rs1, rs2, imm } => resolved::Inst::Out { rs1, rs2, imm },
+
             unresolved::InstKind::Beq { rd, rs1, rs2, val } => resolved::Inst::Beq { rd, rs1, rs2, imm: calc_diff(&val, idx as i64) },
             unresolved::InstKind::Ble { rd, rs1, rs2, val } => resolved::Inst::Ble { rd, rs1, rs2, imm: calc_diff(&val, idx as i64) },
             unresolved::InstKind::Blt { rd, rs1, rs2, val } => resolved::Inst::Blt { rd, rs1, rs2, imm: calc_diff(&val, idx as i64) },
             unresolved::InstKind::Bne { rd, rs1, rs2, val } => resolved::Inst::Bne { rd, rs1, rs2, imm: calc_diff(&val, idx as i64) },
             unresolved::InstKind::Jal { rd, rs1, imm } => resolved::Inst::Jal { rd, rs1, imm },
+
+            unresolved::InstKind::Lw { rd, rs1, imm } => resolved::Inst::Lw { rd, rs1, imm },
+            unresolved::InstKind::Lh { rd, rs1, imm } => resolved::Inst::Lh { rd, rs1, imm },
+            unresolved::InstKind::Lb { rd, rs1, imm } => resolved::Inst::Lb { rd, rs1, imm },
+            unresolved::InstKind::Lhu { rd, rs1, imm } => resolved::Inst::Lhu { rd, rs1, imm },
+            unresolved::InstKind::Lbu { rd, rs1, imm } => resolved::Inst::Lbu { rd, rs1, imm },
+
+            unresolved::InstKind::Sw { rs1, rs2, imm } => resolved::Inst::Sw { rs1, rs2, imm },
+            unresolved::InstKind::Sh { rs1, rs2, imm } => resolved::Inst::Sh { rs1, rs2, imm },
+            unresolved::InstKind::Sb { rs1, rs2, imm } => resolved::Inst::Sb { rs1, rs2, imm },
+
+            unresolved::InstKind::In { rd, rs1, imm } => resolved::Inst::In { rd, rs1, imm },
+            unresolved::InstKind::Out { rs1, rs2, imm } => resolved::Inst::Out { rs1, rs2, imm },
+            
+            unresolved::InstKind::And { rd, rs1, rs2 } => resolved::Inst::And { rd, rs1, rs2 },
+            unresolved::InstKind::Or { rd, rs1, rs2 } => resolved::Inst::Or { rd, rs1, rs2 },
+            unresolved::InstKind::Xor { rd, rs1, rs2 } => resolved::Inst::Xor { rd, rs1, rs2 },
+            unresolved::InstKind::Srl { rd, rs1, rs2 } => resolved::Inst::Srl { rd, rs1, rs2 },
+            unresolved::InstKind::Sra { rd, rs1, rs2 } => resolved::Inst::Sra { rd, rs1, rs2 },
+            unresolved::InstKind::Sll { rd, rs1, rs2 } => resolved::Inst::Sll { rd, rs1, rs2 },
+
+            unresolved::InstKind::Andi { rd, rs1, val } => resolved::Inst::Andi { rd, rs1, imm: calc_imm(&val) },
+            unresolved::InstKind::Ori { rd, rs1, val } => resolved::Inst::Ori { rd, rs1, imm: calc_imm(&val) },
+            unresolved::InstKind::Xori { rd, rs1, val } => resolved::Inst::Xori { rd, rs1, imm: calc_imm(&val) },
+            unresolved::InstKind::Srli { rd, rs1, val } => resolved::Inst::Srli { rd, rs1, imm: calc_imm(&val) },
+            unresolved::InstKind::Srai { rd, rs1, val } => resolved::Inst::Srai { rd, rs1, imm: calc_imm(&val) },
+            unresolved::InstKind::Slli { rd, rs1, val } => resolved::Inst::Slli { rd, rs1, imm: calc_imm(&val) },
         };
         resolved_insts.push(converted);
     }
+
     Ok(resolved_insts)
 }
 

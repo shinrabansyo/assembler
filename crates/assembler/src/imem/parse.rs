@@ -195,6 +195,20 @@ fn parse_inst(kind: &str, args: Vec<&str>) -> anyhow::Result<Inst> {
         "in" => Ok(InstKind::In { rd: args[0].u8(), rs1: args[1].u8(), imm: args[2].i32() }),
         "out" => Ok(InstKind::Out { rs1: args[0].u8(), imm: args[1].i32(), rs2: args[2].u8() }),
 
+        "and" => Ok(InstKind::And { rd: args[0].u8(), rs1: args[1].u8(), rs2: args[2].u8() }),
+        "or" => Ok(InstKind::Or { rd: args[0].u8(), rs1: args[1].u8(), rs2: args[2].u8() }),
+        "xor" => Ok(InstKind::Xor { rd: args[0].u8(), rs1: args[1].u8(), rs2: args[2].u8() }),
+        "srl" => Ok(InstKind::Srl { rd: args[0].u8(), rs1: args[1].u8(), rs2: args[2].u8() }),
+        "sra" => Ok(InstKind::Sra { rd: args[0].u8(), rs1: args[1].u8(), rs2: args[2].u8() }),
+        "sll" => Ok(InstKind::Sll { rd: args[0].u8(), rs1: args[1].u8(), rs2: args[2].u8() }),
+
+        "andi" => Ok(InstKind::Andi { rd: args[0].u8(), rs1: args[1].u8(), val: args[2].value() }),
+        "ori" => Ok(InstKind::Ori { rd: args[0].u8(), rs1: args[1].u8(), val: args[2].value() }),
+        "xori" => Ok(InstKind::Xori { rd: args[0].u8(), rs1: args[1].u8(), val: args[2].value() }),
+        "srli" => Ok(InstKind::Srli { rd: args[0].u8(), rs1: args[1].u8(), val: args[2].value() }),
+        "srai" => Ok(InstKind::Srai { rd: args[0].u8(), rs1: args[1].u8(), val: args[2].value() }),
+        "slli" => Ok(InstKind::Slli { rd: args[0].u8(), rs1: args[1].u8(), val: args[2].value() }),
+
        _ => Err(anyhow::anyhow!("Invalid instruction: {}", kind)),
     }?;
 

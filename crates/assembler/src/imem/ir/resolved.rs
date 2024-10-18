@@ -23,4 +23,18 @@ pub enum Inst {
 
     In { rd: u8, rs1: u8, imm: i32 },
     Out { rs1: u8, rs2: u8, imm: i32 },
+
+    And { rd: u8, rs1: u8, rs2: u8 },
+    Or { rd: u8, rs1: u8, rs2: u8 },
+    Xor { rd: u8, rs1: u8, rs2: u8 },
+    Srl { rd: u8, rs1: u8, rs2: u8 },
+    Sra { rd: u8, rs1: u8, rs2: u8 },
+    Sll { rd: u8, rs1: u8, rs2: u8 },
+
+    Andi { rd: u8, rs1: u8, imm: u32 },
+    Ori { rd: u8, rs1: u8, imm: u32 },
+    Xori { rd: u8, rs1: u8, imm: u32 },
+    Srli { rd: u8, rs1: u8, imm: u32 },
+    Srai { rd: u8, rs1: u8, imm: u32 },
+    Slli { rd: u8, rs1: u8, imm: u32 },
 }
