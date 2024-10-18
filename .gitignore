@@ -1,1 +1,3 @@
 target
+crates/assembler/target
+crates/compiler/target
