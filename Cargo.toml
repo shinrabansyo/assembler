@@ -1,10 +1,19 @@
 [package]
-name = "shirabansyo_lang"
+name = "sb_asm_cli"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-assembler = { path = "./crates/assembler"}
-compiler = { path = "./crates/compiler" }
-anyhow = "1.0"
-thiserror = "1.0"
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+sb_asm = { path = "./assembler"}
+
+[workspace]
+resolver = "2"
+members = [
+    "./assembler",
+]
+
+[workspace.dependencies]
+anyhow = "1.0.93"
+thiserror = "2.0.3"
