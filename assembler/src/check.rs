@@ -2,7 +2,7 @@ use crate::imem::ir::unresolved::{Inst, InstKind, Value};
 use crate::dmem::ir::Data;
 
 pub fn check(datas: &[Data], insts: &[Inst]) -> anyhow::Result<()> {
-    check_label_exists(datas, insts)?; 
+    check_label_exists(datas, insts)?;
     check_label_usage(insts)?;
     check_reg_range(insts)?;
     check_value_range(insts)?;
@@ -15,8 +15,8 @@ fn check_label_exists(datas: &[Data], insts: &[Inst]) -> anyhow::Result<()> {
     let data_labels = datas.iter()
         .filter(|data| data.label.is_some())
         .map(|data| data.label.clone().unwrap())
-        .collect::<Vec<String>>();  
-    
+        .collect::<Vec<String>>();
+
     let inst_labels = insts.iter()
         .filter(|inst| inst.label.is_some())
         .map(|inst| inst.label.clone().unwrap())
@@ -33,7 +33,7 @@ fn check_label_exists(datas: &[Data], insts: &[Inst]) -> anyhow::Result<()> {
             InstKind::Ble { val, .. } => val,
             _ => continue,
         };
-        
+
         match val {
             Value::DataLabel(label) => {
                 if !data_labels.contains(label) {
@@ -71,7 +71,7 @@ fn check_label_usage(insts: &[Inst]) -> anyhow::Result<()> {
 fn check_reg_range(insts: &[Inst]) -> anyhow::Result<()> {
     // I形式：rd: 0-31, rs1: 0-7
     // R/B/S形式: rd/rs1/rs2: 0-31
-    
+
     let check_i_type = |rd: &u8, rs1: &u8| -> bool {
         *rd <= 31 && *rs1 <= 7
     };
@@ -100,13 +100,13 @@ fn check_reg_range(insts: &[Inst]) -> anyhow::Result<()> {
             InstKind::Srli { rd, rs1, .. } => check_i_type(rd, rs1),
             InstKind::Srai { rd, rs1, .. } => check_i_type(rd, rs1),
             InstKind::Slli { rd, rs1, .. } => check_i_type(rd, rs1),
-            
+
             // S-type
             InstKind::Sw  { rs1, rs2, .. } => check_s_type(rs1, rs2),
             InstKind::Sh  { rs1, rs2, .. } => check_s_type(rs1, rs2),
             InstKind::Sb  { rs1, rs2, .. } => check_s_type(rs1, rs2),
             InstKind::Out { rs1, rs2, .. } => check_s_type(rs1, rs2),
-            
+
             // R-type
             InstKind::Add { rd, rs1, rs2 } => check_other_type(rd, rs1, rs2),
             InstKind::Sub { rd, rs1, rs2 } => check_other_type(rd, rs1, rs2),
@@ -121,7 +121,7 @@ fn check_reg_range(insts: &[Inst]) -> anyhow::Result<()> {
             InstKind::Beq { rd, rs1, rs2, .. } => check_other_type(rd, rs1, rs2),
             InstKind::Bne { rd, rs1, rs2, .. } => check_other_type(rd, rs1, rs2),
             InstKind::Blt { rd, rs1, rs2, .. } => check_other_type(rd, rs1, rs2),
-            InstKind::Ble { rd, rs1, rs2, .. } => check_other_type(rd, rs1, rs2), 
+            InstKind::Ble { rd, rs1, rs2, .. } => check_other_type(rd, rs1, rs2),
         };
         if !is_correct_reg {
             return Err(anyhow::anyhow!("Invalid register usage: {:?}", inst));
@@ -141,7 +141,7 @@ fn check_value_range(insts: &[Inst]) -> anyhow::Result<()> {
 
     let is_imm_i25 = |val: &Value| -> bool {
         if let Value::Imm(imm) = val {
-            *imm >= ((1 << 24) as i64) || *imm < (-(1 << 24) as i64) 
+            *imm >= (-(1 << 24) as i64) || *imm < ((1 << 24) as i64)
         } else {
             true
         }
