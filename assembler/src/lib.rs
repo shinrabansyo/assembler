@@ -9,22 +9,22 @@ use check::check;
 use resolve::resolve;
 use convert::convert;
 
-pub fn assemble(program: &str) -> anyhow::Result<(String, String)> { 
-    let lines = program.lines();
-    let sep_pos = lines.clone().position(|line| line == "===").unwrap();
+pub fn assemble(program: &str) -> anyhow::Result<(String, String)> {
+    // 分割
+    let lines = program.lines().collect::<Vec<_>>();
+    let sep_pos = lines
+        .iter()
+        .position(|&line| line == "===")
+        .unwrap();
 
-    let lines = lines.collect::<Vec<_>>();
-    let dmem_section = &lines[..sep_pos].join("\n");
-    let imem_section = &lines[sep_pos+1..].join("\n");
+    // 構文解析
+    let datas = dmem::parse(&lines[..sep_pos])?;
+    let insts = imem::parse(&lines[sep_pos..])?;
 
-    // dmem のパース
-    let datas = dmem::parse(&dmem_section)?;
-
-    // imem のパース
-    let insts = imem::parse(&imem_section)?;
-    
-    // 合流
+    // 意味解析
     check(&datas, &insts)?;
+
+    // コード生成
     let insts = resolve(&datas, insts)?;
     convert(datas, insts)
 }

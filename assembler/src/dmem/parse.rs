@@ -1,8 +1,8 @@
 use crate::dmem::ir::{Data, Command};
 
-pub fn parse(program: &str) -> anyhow::Result<Vec<Data>> {
-    let lines = program
-        .split("\n")
+pub fn parse(lines: &[&str]) -> anyhow::Result<Vec<Data>> {
+    let lines = lines
+        .into_iter()
         .map(|line| line.trim())
         .map(|line| line.split("//").collect::<Vec<_>>()[0])
         .filter(|line| !line.is_empty())
@@ -57,7 +57,7 @@ fn parse_u8(num: &str) -> anyhow::Result<u8> {
     let mut num = parse_num_with_radix(num)?;
     if !(i8::MIN as i64 <= num && num <= u8::MAX as i64) {
         return Err(anyhow::anyhow!("Invalid value: {}", num));
-    } 
+    }
     if num < 0 {
         num = (num + (u8::MAX) as i64 + 1) | 0x80;
     }
@@ -68,7 +68,7 @@ fn parse_u16(num: &str) -> anyhow::Result<u16> {
     let mut num = parse_num_with_radix(num)?;
     if !(i16::MIN as i64 <= num && num <= u16::MAX as i64) {
         return Err(anyhow::anyhow!("Invalid value: {}", num));
-    } 
+    }
     if num < 0 {
         num = (num + (u16::MAX) as i64 + 1) | 0x8000;
     }
@@ -79,7 +79,7 @@ fn parse_u32(num: &str) -> anyhow::Result<u32> {
     let mut num = parse_num_with_radix(num)?;
     if !(i32::MIN as i64 <= num && num <= u32::MAX as i64) {
         return Err(anyhow::anyhow!("Invalid value: {}", num));
-    } 
+    }
     if num < 0 {
         num = (num + (u32::MAX) as i64 + 1) | 0x80000000;
     }
@@ -92,7 +92,7 @@ fn parse_u48(num: &str) -> anyhow::Result<u64> {
     let u48_max = (1 << 48) - 1;
     if !(i48_min <= num && num <= u48_max) {
         return Err(anyhow::anyhow!("Invalid value: {}", num));
-    } 
+    }
     if num < 0 {
         num = (num + u48_max + 1) | 0x800000000000;
     }

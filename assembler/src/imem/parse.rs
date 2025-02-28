@@ -2,15 +2,15 @@ use crate::imem::ir::unresolved::Inst;
 use crate::imem::ir::unresolved::InstKind;
 use crate::imem::ir::unresolved::Value;
 
-pub fn parse(program: &str) -> anyhow::Result<Vec<Inst>> {
+pub fn parse(lines: &[&str]) -> anyhow::Result<Vec<Inst>> {
     // program
     // 1: addi r1 = r0, 1\n
     // 2: beq r0, (r0, r0) -> -42\n
     // 3: lw r7 = r0[4]\n
     // 4: ...
 
-    let lines = program
-        .split("\n")
+    let lines = lines
+        .into_iter()
         .map(|line| line.trim())
         .map(|line| line.split("//").collect::<Vec<_>>()[0])
         .filter(|line| !line.is_empty())
@@ -127,14 +127,14 @@ fn parse_inst(kind: &str, args: Vec<&str>) -> anyhow::Result<Inst> {
                 ArgEither::String(s) => panic!("Unexpected string: {}", s),
             }
         }
-        
+
         fn i32(&self) -> i32 {
             match self {
                 ArgEither::Num(num) => *num as i32,
                 ArgEither::String(s) => panic!("Unexpected string: {}", s),
             }
         }
-        
+
         fn value(&self) -> Value {
             match self {
                 ArgEither::Num(num) => Value::Imm(*num as i64),
