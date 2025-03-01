@@ -1,4 +1,4 @@
-use crate::dmem::ir::{Data, Command};
+use crate::dmem::ir::{Command, Data};
 
 pub fn parse(lines: &[&str]) -> anyhow::Result<Vec<Data>> {
     let lines = lines
@@ -28,12 +28,11 @@ pub fn parse(lines: &[&str]) -> anyhow::Result<Vec<Data>> {
 
 fn parse_line(line: &str) -> anyhow::Result<Vec<Data>> {
     let splitted_line = line.split_whitespace().collect::<Vec<_>>();
-    let (command, args) = splitted_line.split_first().unwrap();
-    let command = command.trim();
-    let args = args.join(" ");
+    let command = splitted_line[0].trim();
+    let args = line.replacen(command, "", 1);
 
     let mut data = Vec::new();
-    for arg in args.split(",") {
+    for arg in args.trim().split(",") {
         let arg = arg.trim();
         let inst_command = match command {
             "byte1" => Command::Byte1(parse_u8(arg)?),
@@ -120,7 +119,10 @@ fn parse_char(ch: &str) -> anyhow::Result<char> {
     let chars = ch.chars().collect::<Vec<_>>();
     // シングルクォーテーションで囲まれていることを検査
     if chars[0] != '\'' || chars[2] != '\'' {
-        return Err(anyhow::anyhow!("Unexpected identifier(expect: \"'\"): {}", ch));
+        return Err(anyhow::anyhow!(
+            "Unexpected identifier(expect: \"'\"): {}",
+            ch
+        ));
     }
     Ok(chars[1])
 }
@@ -128,8 +130,11 @@ fn parse_char(ch: &str) -> anyhow::Result<char> {
 fn parse_string(string: &str) -> anyhow::Result<String> {
     let chars = string.chars().collect::<Vec<_>>();
     // ダブルクォーテーションで囲まれていることを検査
-    if chars[0] != '\"' || chars[chars.len()-1] != '\"' {
-        return Err(anyhow::anyhow!("Unexpected identifier(expect: '\"'): {}", string));
+    if chars[0] != '\"' || chars[chars.len() - 1] != '\"' {
+        return Err(anyhow::anyhow!(
+            "Unexpected identifier(expect: '\"'): {}",
+            string
+        ));
     }
-    Ok(chars[1..chars.len()-1].iter().collect())
+    Ok(chars[1..chars.len() - 1].iter().collect())
 }
