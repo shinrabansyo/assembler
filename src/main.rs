@@ -3,7 +3,7 @@ use std::io::Write;
 use std::fs::File;
 use std::fs;
 
-use sb_asm::assemble;
+use sb_assembler::assemble;
 
 #[rustfmt::skip]
 fn main() {

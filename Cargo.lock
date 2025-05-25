@@ -27,7 +27,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sb_asm"
+name = "sb_assembler"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -35,11 +35,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "sb_asm_cli"
+name = "sb_assembler_cli"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "sb_asm",
+ "sb_assembler",
  "thiserror",
 ]
 

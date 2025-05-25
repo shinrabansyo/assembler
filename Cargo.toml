@@ -1,12 +1,12 @@
 [package]
-name = "sb_asm_cli"
+name = "sb_assembler_cli"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 anyhow = { workspace = true }
 thiserror = { workspace = true }
-sb_asm = { path = "./assembler"}
+sb_assembler = { path = "./assembler"}
 
 [workspace]
 resolver = "2"
