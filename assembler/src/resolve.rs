@@ -44,6 +44,7 @@ pub fn resolve(datas: &[Data], insts: Vec<unresolved::Inst>) -> anyhow::Result<V
 
     let mut resolved_insts = Vec::new();
     for (idx, inst) in insts.into_iter().enumerate() { 
+        #[rustfmt::skip]
         let converted = match inst.kind {
             unresolved::InstKind::Add { rd, rs1, rs2 } => resolved::Inst::Add { rd, rs1, rs2 },
             unresolved::InstKind::Sub { rd, rs1, rs2 } => resolved::Inst::Sub { rd, rs1, rs2 },
@@ -66,6 +67,7 @@ pub fn resolve(datas: &[Data], insts: Vec<unresolved::Inst>) -> anyhow::Result<V
             unresolved::InstKind::Sw { rs1, rs2, imm } => resolved::Inst::Sw { rs1, rs2, imm },
             unresolved::InstKind::Sh { rs1, rs2, imm } => resolved::Inst::Sh { rs1, rs2, imm },
             unresolved::InstKind::Sb { rs1, rs2, imm } => resolved::Inst::Sb { rs1, rs2, imm },
+            unresolved::InstKind::Isb { rs1, rs2, imm } => resolved::Inst::Isb {rs1, rs2, imm },
 
             unresolved::InstKind::In { rd, rs1, imm } => resolved::Inst::In { rd, rs1, imm },
             unresolved::InstKind::Out { rs1, rs2, imm } => resolved::Inst::Out { rs1, rs2, imm },

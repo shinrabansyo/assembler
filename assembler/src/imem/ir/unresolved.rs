@@ -8,6 +8,7 @@ pub struct Inst {
 // addi rd = rs1, $label
 // addi rd = rs1, 0x10
 #[derive(Debug)]
+#[rustfmt::skip]
 pub enum InstKind {
     Add { rd: u8, rs1: u8, rs2: u8 },
     Sub { rd: u8, rs1: u8, rs2: u8 },
@@ -30,6 +31,7 @@ pub enum InstKind {
     Sw { rs1: u8, rs2: u8, imm: i32 },
     Sh { rs1: u8, rs2: u8, imm: i32 },
     Sb { rs1: u8, rs2: u8, imm: i32 },
+    Isb { rs1: u8, rs2: u8, imm: i32 },
 
     In { rd: u8, rs1: u8, imm: i32 },
     Out { rs1: u8, rs2: u8, imm: i32 },

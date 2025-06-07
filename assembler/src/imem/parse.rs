@@ -256,7 +256,11 @@ fn parse_inst(kind: &str, args: Vec<&str>) -> anyhow::Result<Inst> {
             imm: args[1].i32(),
             rs2: args[2].u8(),
         }),
-
+        "isb" => Ok(InstKind::Isb {
+            rs1: args[0].u8(),
+            imm: args[1].i32(),
+            rs2: args[2].u8(),
+        }),
         "in" => Ok(InstKind::In {
             rd: args[0].u8(),
             rs1: args[1].u8(),

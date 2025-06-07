@@ -1,5 +1,5 @@
-use crate::imem::ir::unresolved::{Inst, InstKind, Value};
 use crate::dmem::ir::Data;
+use crate::imem::ir::unresolved::{Inst, InstKind, Value};
 
 pub fn check(datas: &[Data], insts: &[Inst]) -> anyhow::Result<()> {
     check_label_exists(datas, insts)?;
@@ -12,12 +12,14 @@ pub fn check(datas: &[Data], insts: &[Inst]) -> anyhow::Result<()> {
 
 // 宣言されていないラベルを呼び出ししていたらエラー
 fn check_label_exists(datas: &[Data], insts: &[Inst]) -> anyhow::Result<()> {
-    let data_labels = datas.iter()
+    let data_labels = datas
+        .iter()
         .filter(|data| data.label.is_some())
         .map(|data| data.label.clone().unwrap())
         .collect::<Vec<String>>();
 
-    let inst_labels = insts.iter()
+    let inst_labels = insts
+        .iter()
         .filter(|inst| inst.label.is_some())
         .map(|inst| inst.label.clone().unwrap())
         .collect::<Vec<String>>();
@@ -45,15 +47,15 @@ fn check_label_exists(datas: &[Data], insts: &[Inst]) -> anyhow::Result<()> {
                     return Err(anyhow::anyhow!("label {} is not found", label));
                 }
             }
-            _ => {},
+            _ => {}
         }
-
     }
     Ok(())
 }
 
 fn check_label_usage(insts: &[Inst]) -> anyhow::Result<()> {
     for inst in insts {
+        #[rustfmt::skip]
         let is_collect_usage = match &inst.kind {
             InstKind::Beq { val, .. } => !matches!(val, Value::DataLabel(_)),
             InstKind::Bne { val, .. } => !matches!(val, Value::DataLabel(_)),
@@ -62,7 +64,10 @@ fn check_label_usage(insts: &[Inst]) -> anyhow::Result<()> {
             _ => continue,
         };
         if !is_collect_usage {
-            return Err(anyhow::anyhow!("Datalabel is not permitted in branch instruction {:?}", inst));
+            return Err(anyhow::anyhow!(
+                "Datalabel is not permitted in branch instruction {:?}",
+                inst
+            ));
         }
     }
     Ok(())
@@ -72,17 +77,13 @@ fn check_reg_range(insts: &[Inst]) -> anyhow::Result<()> {
     // I形式：rd: 0-31, rs1: 0-7
     // R/B/S形式: rd/rs1/rs2: 0-31
 
-    let check_i_type = |rd: &u8, rs1: &u8| -> bool {
-        *rd <= 31 && *rs1 <= 7
-    };
-    let check_s_type = |rs1: &u8, rs2: &u8| -> bool {
-        *rs1 <= 7 && *rs2 <= 31
-    };
-    let check_other_type = |rd: &u8, rs1: &u8, rs2: &u8| -> bool {
-        *rd <= 31 && *rs1 <= 31 && *rs2 <= 31
-    };
+    let check_i_type = |rd: &u8, rs1: &u8| -> bool { *rd <= 31 && *rs1 <= 7 };
+    let check_s_type = |rs1: &u8, rs2: &u8| -> bool { *rs1 <= 7 && *rs2 <= 31 };
+    let check_other_type =
+        |rd: &u8, rs1: &u8, rs2: &u8| -> bool { *rd <= 31 && *rs1 <= 31 && *rs2 <= 31 };
 
     for inst in insts {
+        #[rustfmt::skip]
         let is_correct_reg = match &inst.kind {
             // I-type
             InstKind::Addi { rd, rs1, .. } => check_i_type(rd, rs1),
@@ -106,6 +107,7 @@ fn check_reg_range(insts: &[Inst]) -> anyhow::Result<()> {
             InstKind::Sh  { rs1, rs2, .. } => check_s_type(rs1, rs2),
             InstKind::Sb  { rs1, rs2, .. } => check_s_type(rs1, rs2),
             InstKind::Out { rs1, rs2, .. } => check_s_type(rs1, rs2),
+            InstKind::Isb { rs1, rs2, .. } => check_s_type(rs1, rs2),
 
             // R-type
             InstKind::Add { rd, rs1, rs2 } => check_other_type(rd, rs1, rs2),
@@ -148,6 +150,7 @@ fn check_value_range(insts: &[Inst]) -> anyhow::Result<()> {
     };
 
     for inst in insts {
+        #[rustfmt::skip]
         let is_correct_imm = match &inst.kind {
             InstKind::Addi { val, .. } => is_imm_u32(val),
             InstKind::Subi { val, .. } => is_imm_u32(val),
