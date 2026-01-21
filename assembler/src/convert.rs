@@ -1,52 +1,70 @@
-use std::fmt::Write;
-
 use crate::imem::ir::resolved::Inst;
 use crate::dmem::ir::{Data, Command};
 
-pub fn convert(datas: Vec<Data>, insts: Vec<Inst>) -> anyhow::Result<(String, String)> {
-    let datas = command_convert(datas)?;
-    let inst = inst_convert(insts)?;
+pub fn convert(datas: Vec<Data>, insts: Vec<Inst>, chunk_size: usize) -> anyhow::Result<(String, String)> {
+    let datas = command_convert(datas, chunk_size)?;
+    let inst = inst_convert(insts, chunk_size)?;
     Ok((datas, inst))
 }
-pub fn command_convert(datas: Vec<Data>) -> anyhow::Result<String> {
-    let mut result = String::new();
+pub fn command_convert(datas: Vec<Data>, chunk_size: usize) -> anyhow::Result<String> {
+    let mut bytes: Vec<u8> = Vec::new();
 
     for data in datas {
         match data.command {
-            Command::Byte1(s) => writeln!(result, "{:0>2X}", s)?,
+            Command::Byte1(s) => bytes.push(s),
             Command::Byte2(s) => {
-                writeln!(result, "{:0>2X}", (s >>  0) & 0xff)?;
-                writeln!(result, "{:0>2X}", (s >>  8) & 0xff)?;
+                bytes.push((s >>  0) as u8);
+                bytes.push((s >>  8) as u8);
             }
             Command::Byte4(s) => {
-                writeln!(result, "{:0>2X}", (s >>  0) & 0xff)?;
-                writeln!(result, "{:0>2X}", (s >>  8) & 0xff)?;
-                writeln!(result, "{:0>2X}", (s >> 16) & 0xff)?;
-                writeln!(result, "{:0>2X}", (s >> 24) & 0xff)?;
+                bytes.push((s >>  0) as u8);
+                bytes.push((s >>  8) as u8);
+                bytes.push((s >> 16) as u8);
+                bytes.push((s >> 24) as u8);
             }
             Command::Byte6(s) => {
-                writeln!(result, "{:0>2X}", (s >>  0) & 0xff)?;
-                writeln!(result, "{:0>2X}", (s >>  8) & 0xff)?;
-                writeln!(result, "{:0>2X}", (s >> 16) & 0xff)?;
-                writeln!(result, "{:0>2X}", (s >> 24) & 0xff)?;
-                writeln!(result, "{:0>2X}", (s >> 32) & 0xff)?;
-                writeln!(result, "{:0>2X}", (s >> 40) & 0xff)?;
+                bytes.push((s >>  0) as u8);
+                bytes.push((s >>  8) as u8);
+                bytes.push((s >> 16) as u8);
+                bytes.push((s >> 24) as u8);
+                bytes.push((s >> 32) as u8);
+                bytes.push((s >> 40) as u8);
             },
-            Command::Char(s) => writeln!(result, "{:0>2X}", s as u8)?,
+            Command::Char(s) => bytes.push(s as u8),
             Command::String(s) => {
                 for n in s.as_bytes(){
-                    writeln!(result, "{:0>2X}", n)?;
+                    bytes.push(*n);
                 }
-                writeln!(result, "{:0>2X}", 0)?;
+                bytes.push(0);
             },
         }
     }
 
+    // chunk_size に満たない場合は 0 で埋める
+    if bytes.len() % chunk_size != 0 {
+        for _ in 0..(chunk_size - (bytes.len() % chunk_size)) {
+            bytes.push(0);
+        }
+    }
+
+    // chunk_size ごとに区切って、リトルエンディアンで出力
+    let result = bytes
+        .chunks(chunk_size)
+        .map(|chunk| {
+            chunk
+                .iter()
+                .rev()
+                .map(|e| format!("{:0>2X}", e))
+                .collect::<String>()
+        })
+        .collect::<Vec<String>>()
+        .join("\n");
+
     Ok(result)
 }
 
-pub fn inst_convert(insts: Vec<Inst>) -> anyhow::Result<String> {
-    let mut result = String::new();
+pub fn inst_convert(insts: Vec<Inst>, chunk_size: usize) -> anyhow::Result<String> {
+    let mut bytes = Vec::new();
 
     for inst in insts {
         #[rustfmt::skip]
@@ -104,14 +122,29 @@ pub fn inst_convert(insts: Vec<Inst>) -> anyhow::Result<String> {
             (inst_u64 >> 32) & 0b11111111,
             (inst_u64 >> 40) & 0b11111111,
         ];
-        let inst_s = inst_bytes
-            .into_iter()
-            .map(|e| format!("{:0>2X}", e))
-            .collect::<Vec<String>>()
-            .join("\n");
+        bytes.extend_from_slice(&inst_bytes);
 
-        writeln!(result, "{}", inst_s)?;
+
     }
+    // chunk_size に満たない場合は 0 で埋める
+    if bytes.len() % chunk_size != 0 {
+        for _ in 0..(chunk_size - (bytes.len() % chunk_size)) {
+            bytes.push(0);
+        }
+    }
+
+    // chunk_size ごとに区切って、リトルエンディアンで出力
+    let result = bytes
+        .chunks(chunk_size)
+        .map(|chunk| {
+            chunk
+                .iter()
+                .rev()
+                .map(|e| format!("{:0>2X}", e))
+                .collect::<String>()
+        })
+        .collect::<Vec<String>>()
+        .join("\n");
 
     Ok(result)
 }

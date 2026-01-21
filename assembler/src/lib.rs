@@ -9,7 +9,7 @@ use check::check;
 use convert::convert;
 use resolve::resolve;
 
-pub fn assemble(program: &str) -> anyhow::Result<(String, String)> {
+pub fn assemble(program: &str, chunk_size: usize) -> anyhow::Result<(String, String)> {
     // 分割
     let lines = program.lines().collect::<Vec<_>>();
     let sep_pos = lines.iter().position(|&line| line == "===").unwrap();
@@ -23,5 +23,5 @@ pub fn assemble(program: &str) -> anyhow::Result<(String, String)> {
 
     // コード生成
     let insts = resolve(&datas, insts)?;
-    convert(datas, insts)
+    convert(datas, insts, chunk_size)
 }
