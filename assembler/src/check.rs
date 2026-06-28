@@ -77,8 +77,8 @@ fn check_reg_range(insts: &[Inst]) -> anyhow::Result<()> {
     // I形式：rd: 0-31, rs1: 0-7
     // R/B/S形式: rd/rs1/rs2: 0-31
 
-    let check_i_type = |rd: &u8, rs1: &u8| -> bool { *rd <= 31 && *rs1 <= 7 };
-    let check_s_type = |rs1: &u8, rs2: &u8| -> bool { *rs1 <= 7 && *rs2 <= 31 };
+    let check_i_type = |rd: &u8, rs1: &u8| -> bool { *rd <= 31 && *rs1 <= 31 };
+    let check_s_type = |rs1: &u8, rs2: &u8| -> bool { *rs1 <= 31 && *rs2 <= 31 };
     let check_other_type =
         |rd: &u8, rs1: &u8, rs2: &u8| -> bool { *rd <= 31 && *rs1 <= 31 && *rs2 <= 31 };
 
@@ -96,11 +96,12 @@ fn check_reg_range(insts: &[Inst]) -> anyhow::Result<()> {
             InstKind::Lbu  { rd, rs1, .. } => check_i_type(rd, rs1),
             InstKind::In   { rd, rs1, .. } => check_i_type(rd, rs1),
             InstKind::Andi { rd, rs1, .. } => check_i_type(rd, rs1),
-            InstKind::Ori { rd, rs1, .. } => check_i_type(rd, rs1),
+            InstKind::Ori  { rd, rs1, .. } => check_i_type(rd, rs1),
             InstKind::Xori { rd, rs1, .. } => check_i_type(rd, rs1),
             InstKind::Srli { rd, rs1, .. } => check_i_type(rd, rs1),
             InstKind::Srai { rd, rs1, .. } => check_i_type(rd, rs1),
             InstKind::Slli { rd, rs1, .. } => check_i_type(rd, rs1),
+            InstKind::Ilb  { rd, rs1, .. } => check_i_type(rd, rs1),
 
             // S-type
             InstKind::Sw  { rs1, rs2, .. } => check_s_type(rs1, rs2),
@@ -113,7 +114,7 @@ fn check_reg_range(insts: &[Inst]) -> anyhow::Result<()> {
             InstKind::Add { rd, rs1, rs2 } => check_other_type(rd, rs1, rs2),
             InstKind::Sub { rd, rs1, rs2 } => check_other_type(rd, rs1, rs2),
             InstKind::And { rd, rs1, rs2 } => check_other_type(rd, rs1, rs2),
-            InstKind::Or { rd, rs1, rs2 } => check_other_type(rd, rs1, rs2),
+            InstKind::Or  { rd, rs1, rs2 } => check_other_type(rd, rs1, rs2),
             InstKind::Xor { rd, rs1, rs2 } => check_other_type(rd, rs1, rs2),
             InstKind::Srl { rd, rs1, rs2 } => check_other_type(rd, rs1, rs2),
             InstKind::Sra { rd, rs1, rs2 } => check_other_type(rd, rs1, rs2),

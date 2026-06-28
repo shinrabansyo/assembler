@@ -173,105 +173,6 @@ fn parse_inst(kind: &str, args: Vec<&str>) -> anyhow::Result<Inst> {
             rs1: args[1].u8(),
             rs2: args[2].u8(),
         }),
-
-        "addi" => Ok(InstKind::Addi {
-            rd: args[0].u8(),
-            rs1: args[1].u8(),
-            val: args[2].value(),
-        }),
-        "subi" => Ok(InstKind::Subi {
-            rd: args[0].u8(),
-            rs1: args[1].u8(),
-            val: args[2].value(),
-        }),
-
-        "beq" => Ok(InstKind::Beq {
-            rd: args[0].u8(),
-            rs1: args[1].u8(),
-            rs2: args[2].u8(),
-            val: args[3].value(),
-        }),
-        "bne" => Ok(InstKind::Bne {
-            rd: args[0].u8(),
-            rs1: args[1].u8(),
-            rs2: args[2].u8(),
-            val: args[3].value(),
-        }),
-        "blt" => Ok(InstKind::Blt {
-            rd: args[0].u8(),
-            rs1: args[1].u8(),
-            rs2: args[2].u8(),
-            val: args[3].value(),
-        }),
-        "ble" => Ok(InstKind::Ble {
-            rd: args[0].u8(),
-            rs1: args[1].u8(),
-            rs2: args[2].u8(),
-            val: args[3].value(),
-        }),
-        "jal" => Ok(InstKind::Jal {
-            rd: args[0].u8(),
-            rs1: args[1].u8(),
-            imm: args[2].i32(),
-        }),
-
-        "lw" => Ok(InstKind::Lw {
-            rd: args[0].u8(),
-            rs1: args[1].u8(),
-            imm: args[2].i32(),
-        }),
-        "lh" => Ok(InstKind::Lh {
-            rd: args[0].u8(),
-            rs1: args[1].u8(),
-            imm: args[2].i32(),
-        }),
-        "lb" => Ok(InstKind::Lb {
-            rd: args[0].u8(),
-            rs1: args[1].u8(),
-            imm: args[2].i32(),
-        }),
-        "lhu" => Ok(InstKind::Lhu {
-            rd: args[0].u8(),
-            rs1: args[1].u8(),
-            imm: args[2].i32(),
-        }),
-        "lbu" => Ok(InstKind::Lbu {
-            rd: args[0].u8(),
-            rs1: args[1].u8(),
-            imm: args[2].i32(),
-        }),
-
-        "sw" => Ok(InstKind::Sw {
-            rs1: args[0].u8(),
-            imm: args[1].i32(),
-            rs2: args[2].u8(),
-        }),
-        "sh" => Ok(InstKind::Sh {
-            rs1: args[0].u8(),
-            imm: args[1].i32(),
-            rs2: args[2].u8(),
-        }),
-        "sb" => Ok(InstKind::Sb {
-            rs1: args[0].u8(),
-            imm: args[1].i32(),
-            rs2: args[2].u8(),
-        }),
-        "isb" => Ok(InstKind::Isb {
-            rs1: args[0].u8(),
-            imm: args[1].i32(),
-            rs2: args[2].u8(),
-        }),
-        "in" => Ok(InstKind::In {
-            rd: args[0].u8(),
-            rs1: args[1].u8(),
-            imm: args[2].i32(),
-        }),
-        "out" => Ok(InstKind::Out {
-            rs1: args[0].u8(),
-            imm: args[1].i32(),
-            rs2: args[2].u8(),
-        }),
-
         "and" => Ok(InstKind::And {
             rd: args[0].u8(),
             rs1: args[1].u8(),
@@ -303,6 +204,16 @@ fn parse_inst(kind: &str, args: Vec<&str>) -> anyhow::Result<Inst> {
             rs2: args[2].u8(),
         }),
 
+        "addi" => Ok(InstKind::Addi {
+            rd: args[0].u8(),
+            rs1: args[1].u8(),
+            val: args[2].value(),
+        }),
+        "subi" => Ok(InstKind::Subi {
+            rd: args[0].u8(),
+            rs1: args[1].u8(),
+            val: args[2].value(),
+        }),
         "andi" => Ok(InstKind::Andi {
             rd: args[0].u8(),
             rs1: args[1].u8(),
@@ -332,6 +243,98 @@ fn parse_inst(kind: &str, args: Vec<&str>) -> anyhow::Result<Inst> {
             rd: args[0].u8(),
             rs1: args[1].u8(),
             val: args[2].value(),
+        }),
+
+        "lw" => Ok(InstKind::Lw {
+            rd: args[0].u8(),
+            rs1: args[1].u8(),
+            imm: args[2].i32(),
+        }),
+        "lh" => Ok(InstKind::Lh {
+            rd: args[0].u8(),
+            rs1: args[1].u8(),
+            imm: args[2].i32(),
+        }),
+        "lb" => Ok(InstKind::Lb {
+            rd: args[0].u8(),
+            rs1: args[1].u8(),
+            imm: args[2].i32(),
+        }),
+        "lhu" => Ok(InstKind::Lhu {
+            rd: args[0].u8(),
+            rs1: args[1].u8(),
+            imm: args[2].i32(),
+        }),
+        "lbu" => Ok(InstKind::Lbu {
+            rd: args[0].u8(),
+            rs1: args[1].u8(),
+            imm: args[2].i32(),
+        }),
+        "ilb" => Ok(InstKind::Ilb {
+            rd: args[0].u8(),
+            rs1: args[1].u8(),
+            imm: args[2].i32(),
+        }),
+        "in" => Ok(InstKind::In {
+            rd: args[0].u8(),
+            rs1: args[1].u8(),
+            imm: args[2].i32(),
+        }),
+
+        "sw" => Ok(InstKind::Sw {
+            rs1: args[0].u8(),
+            imm: args[1].i32(),
+            rs2: args[2].u8(),
+        }),
+        "sh" => Ok(InstKind::Sh {
+            rs1: args[0].u8(),
+            imm: args[1].i32(),
+            rs2: args[2].u8(),
+        }),
+        "sb" => Ok(InstKind::Sb {
+            rs1: args[0].u8(),
+            imm: args[1].i32(),
+            rs2: args[2].u8(),
+        }),
+        "isb" => Ok(InstKind::Isb {
+            rs1: args[0].u8(),
+            imm: args[1].i32(),
+            rs2: args[2].u8(),
+        }),
+        "out" => Ok(InstKind::Out {
+            rs1: args[0].u8(),
+            imm: args[1].i32(),
+            rs2: args[2].u8(),
+        }),
+
+        "beq" => Ok(InstKind::Beq {
+            rd: args[0].u8(),
+            rs1: args[1].u8(),
+            rs2: args[2].u8(),
+            val: args[3].value(),
+        }),
+        "bne" => Ok(InstKind::Bne {
+            rd: args[0].u8(),
+            rs1: args[1].u8(),
+            rs2: args[2].u8(),
+            val: args[3].value(),
+        }),
+        "blt" => Ok(InstKind::Blt {
+            rd: args[0].u8(),
+            rs1: args[1].u8(),
+            rs2: args[2].u8(),
+            val: args[3].value(),
+        }),
+        "ble" => Ok(InstKind::Ble {
+            rd: args[0].u8(),
+            rs1: args[1].u8(),
+            rs2: args[2].u8(),
+            val: args[3].value(),
+        }),
+        "jal" => Ok(InstKind::Jal {
+            rd: args[0].u8(),
+            rs1: args[1].u8(),
+            imm: args[2].i32(),
         }),
 
         _ => Err(anyhow::anyhow!("Invalid instruction: {}", kind)),
