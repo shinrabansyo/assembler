@@ -106,10 +106,10 @@ pub fn inst_convert(insts: Vec<Inst>, chunk_size: usize) -> anyhow::Result<Strin
             Inst::Isb { rs1, rs2, imm } => format!("{:0>5b}_{:0>5b}_011_101_{:0>32b}", rs2, rs1, imm),
             Inst::Out { rs1, rs2, imm } => format!("{:0>5b}_{:0>5b}_011_110_{:0>32b}", rs2, rs1, imm),
 
-            Inst::Beq { rd, rs1, rs2, imm } => format!("{:0>5b}_{:0>5b}_100_000_{:0>5b}_{:0>27b}", rd, rs1, rs2, imm),
-            Inst::Bne { rd, rs1, rs2, imm } => format!("{:0>5b}_{:0>5b}_100_001_{:0>5b}_{:0>27b}", rd, rs1, rs2, imm),
-            Inst::Blt { rd, rs1, rs2, imm } => format!("{:0>5b}_{:0>5b}_100_010_{:0>5b}_{:0>27b}", rd, rs1, rs2, imm),
-            Inst::Ble { rd, rs1, rs2, imm } => format!("{:0>5b}_{:0>5b}_100_011_{:0>5b}_{:0>27b}", rd, rs1, rs2, imm),
+            Inst::Beq { rd, rs1, rs2, imm } => format!("{:0>5b}_{:0>5b}_100_000_{:0>5b}_{:0>27b}", rd, rs1, rs2, 0x7FFFFFF & imm),
+            Inst::Bne { rd, rs1, rs2, imm } => format!("{:0>5b}_{:0>5b}_100_001_{:0>5b}_{:0>27b}", rd, rs1, rs2, 0x7FFFFFF & imm),
+            Inst::Blt { rd, rs1, rs2, imm } => format!("{:0>5b}_{:0>5b}_100_010_{:0>5b}_{:0>27b}", rd, rs1, rs2, 0x7FFFFFF & imm),
+            Inst::Ble { rd, rs1, rs2, imm } => format!("{:0>5b}_{:0>5b}_100_011_{:0>5b}_{:0>27b}", rd, rs1, rs2, 0x7FFFFFF & imm),
             Inst::Jal { rd, rs1, imm } => format!("{:0>5b}_{:0>5b}_100_100_{:0>32b}", rd, rs1, imm),
         };
 
