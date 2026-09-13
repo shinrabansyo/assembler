@@ -111,6 +111,7 @@ pub fn inst_convert(insts: Vec<Inst>, chunk_size: usize) -> anyhow::Result<Strin
             Inst::Blt { rd, rs1, rs2, imm } => format!("{:0>5b}_{:0>5b}_100_010_{:0>5b}_{:0>27b}", rd, rs1, rs2, 0x7FFFFFF & imm),
             Inst::Ble { rd, rs1, rs2, imm } => format!("{:0>5b}_{:0>5b}_100_011_{:0>5b}_{:0>27b}", rd, rs1, rs2, 0x7FFFFFF & imm),
             Inst::Jal { rd, rs1, imm } => format!("{:0>5b}_{:0>5b}_100_100_{:0>32b}", rd, rs1, imm),
+            Inst::Iret { imm } => format!("{:0>5b}_{:0>5b}_100_101_{:0>32b}", 0, 0, imm),
         };
 
         let s: String = s.replace("_", "");

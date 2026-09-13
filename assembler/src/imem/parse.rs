@@ -42,10 +42,13 @@ fn parse_line(line: &str) -> anyhow::Result<Inst> {
         // add, lw, sw, in, out, ...
         let splitted_by_eq = line.split("=").collect::<Vec<_>>();
         (splitted_by_eq[0], splitted_by_eq[1])
+    } else if line.contains(",") {
+        // jal dst, src1[imm]
+        let splitted_by_comma = line.split(",").collect::<Vec<_>>();
+        (splitted_by_comma[0], splitted_by_comma[1])
     } else {
-        // jal
-        let splitted_by_eq = line.split(",").collect::<Vec<_>>();
-        (splitted_by_eq[0], splitted_by_eq[1])
+        // iret imm
+        (line, "")
     };
     let lhs = lhs.split_ascii_whitespace().collect::<Vec<_>>();
     let (kind, lhs) = (lhs[0], lhs[1..].concat());
@@ -79,7 +82,7 @@ fn parse_line(line: &str) -> anyhow::Result<Inst> {
         return parse_inst(kind, vec![lhs[0], &lhs[1].replace("]", ""), rhs]);
     }
 
-    // lw, ..., in
+    // lw, ..., in, jal
     if rhs.contains("[") {
         let lhs = lhs.trim();
         let rhs = rhs.split("[").map(|e| e.trim()).collect::<Vec<_>>();
@@ -89,15 +92,12 @@ fn parse_line(line: &str) -> anyhow::Result<Inst> {
         return parse_inst(kind, vec![lhs, rhs[0], &rhs[1].replace("]", "")]);
     }
 
-    // jal
-    if lhs.starts_with("jal") {
-        // jal r0, r1[0]
-        // lhs: jal r0
-        // rhs: r1[0]
-        // save_reg: r0
-        let save_reg = lhs.trim().split_ascii_whitespace().next().unwrap().trim();
-        let rhs = rhs.split("[").map(|e| e.trim()).collect::<Vec<_>>();
-        return parse_inst("jal", vec![save_reg, rhs[0], &rhs[1].replace("]", "")]);
+    // iret
+    if kind.starts_with("iret") {
+        // kind: iret
+        // lhs: 0x1234
+        let imm = lhs.trim();
+        return parse_inst("iret", vec![imm]);
     }
 
     // add, addi, ...
@@ -336,6 +336,7 @@ fn parse_inst(kind: &str, args: Vec<&str>) -> anyhow::Result<Inst> {
             rs1: args[1].u8(),
             imm: args[2].i32(),
         }),
+        "iret" => Ok(InstKind::Iret { imm: args[0].i32() }),
 
         _ => Err(anyhow::anyhow!("Invalid instruction: {}", kind)),
     }?;

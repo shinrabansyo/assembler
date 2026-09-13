@@ -37,4 +37,5 @@ pub enum Inst {
     Blt { rd: u8, rs1: u8, rs2: u8, imm: i32 },
     Ble { rd: u8, rs1: u8, rs2: u8, imm: i32 },
     Jal { rd: u8, rs1: u8, imm: i32 },
+    Iret { imm: i32 },
 }
