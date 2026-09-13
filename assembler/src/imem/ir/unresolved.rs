@@ -47,6 +47,7 @@ pub enum InstKind {
     Blt { rd: u8, rs1: u8, rs2: u8, val: Value },
     Ble { rd: u8, rs1: u8, rs2: u8, val: Value },
     Jal { rd: u8, rs1: u8, imm: i32 },
+    Iret { imm: i32 },
 }
 
 #[derive(Debug)]

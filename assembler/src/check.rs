@@ -74,8 +74,7 @@ fn check_label_usage(insts: &[Inst]) -> anyhow::Result<()> {
 }
 
 fn check_reg_range(insts: &[Inst]) -> anyhow::Result<()> {
-    // I形式：rd: 0-31, rs1: 0-7
-    // R/B/S形式: rd/rs1/rs2: 0-31
+    // I/R/B/S形式: rd/rs1/rs2: 0-31
 
     let check_i_type = |rd: &u8, rs1: &u8| -> bool { *rd <= 31 && *rs1 <= 31 };
     let check_s_type = |rs1: &u8, rs2: &u8| -> bool { *rs1 <= 31 && *rs2 <= 31 };
@@ -102,6 +101,7 @@ fn check_reg_range(insts: &[Inst]) -> anyhow::Result<()> {
             InstKind::Srai { rd, rs1, .. } => check_i_type(rd, rs1),
             InstKind::Slli { rd, rs1, .. } => check_i_type(rd, rs1),
             InstKind::Ilb  { rd, rs1, .. } => check_i_type(rd, rs1),
+            InstKind::Iret { .. } => true, // iret はレジスタを使わないので常に正しい
 
             // S-type
             InstKind::Sw  { rs1, rs2, .. } => check_s_type(rs1, rs2),

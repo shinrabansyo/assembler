@@ -86,6 +86,7 @@ pub fn resolve(
             unresolved::InstKind::Blt { rd, rs1, rs2, val } => resolved::Inst::Blt { rd, rs1, rs2, imm: calc_diff(&val, idx as i64) },
             unresolved::InstKind::Bne { rd, rs1, rs2, val } => resolved::Inst::Bne { rd, rs1, rs2, imm: calc_diff(&val, idx as i64) },
             unresolved::InstKind::Jal { rd, rs1, imm } => resolved::Inst::Jal { rd, rs1, imm },
+            unresolved::InstKind::Iret { imm } => resolved::Inst::Iret { imm },
         };
         resolved_insts.push(converted);
     }
